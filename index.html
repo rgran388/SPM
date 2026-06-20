@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>SPM — Sheraton Keystone Package Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F4F6;
+    --surface:#FFFFFF;
+    --border:#E1E4E9;
+    --ink:#16202B;
+    --ink-soft:#5B6573;
+    --navy:#16202B;
+    --navy-soft:#E7EAEE;
+    --gold:#A9842E;
+    --gold-dark:#8A6A22;
+    --gold-soft:#F4ECD8;
+    --green:#2C7A57;
+    --green-soft:#E3F1EA;
+    --red:#B1432F;
+    --red-soft:#F6E7E2;
+    --radius:12px;
+    --shadow:0 2px 10px rgba(22,32,43,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    min-height:100vh;
+  }
+  #app{max-width:640px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;font-weight:600;margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  a{color:var(--gold-dark);}
+
+  /* Top bar */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 18px;background:var(--navy);border-bottom:1px solid var(--navy);
+    position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:8px;}
+  .swatch{width:9px;height:9px;background:var(--gold);border-radius:2px;display:inline-block;flex-shrink:0;}
+  .wordmark{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:0.04em;color:#fff;}
+  .topbar nav{display:flex;gap:6px;align-items:center;}
+  .topbar .staffchip{
+    font-size:0.78rem;background:var(--gold-soft);
+    padding:5px 10px;border-radius:999px;font-weight:600;color:var(--gold-dark);
+    white-space:nowrap;
+  }
+  .iconbtn{
+    background:none;border:1px solid rgba(255,255,255,0.22);border-radius:9px;
+    padding:7px 11px;font-size:0.8rem;color:rgba(255,255,255,0.85);font-weight:600;
+  }
+  .iconbtn:hover{background:rgba(255,255,255,0.08);}
+
+  .view{padding:18px;flex:1;}
+  .view-narrow{max-width:420px;margin:0 auto;width:100%;}
+
+  /* Generic cards / surfaces */
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .pad{padding:18px;}
+
+  /* Login */
+  .login-wrap{
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:30px 20px;gap:22px;background:var(--navy);
+  }
+  .lockup{text-align:center;}
+  .lockup .brandline{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+  .lockup .swatch{width:13px;height:13px;}
+  .lockup .markline{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:2.3rem;letter-spacing:0.05em;color:#fff;}
+  .lockup .rule{width:46px;height:2px;background:var(--gold);margin:0 auto 14px;}
+  .lockup .tagline{font-family:'IBM Plex Sans',sans-serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin:0;}
+  .greeting{color:#fff;font-size:1.5rem;text-align:center;margin-top:4px;}
+  .subtext-light{color:rgba(255,255,255,0.6);text-align:center;font-size:0.88rem;margin-top:2px;}
+  .hint-light{color:rgba(255,255,255,0.5);font-size:0.8rem;text-align:center;margin-top:6px;}
+  .stafflist{display:flex;flex-direction:column;gap:8px;width:100%;max-width:380px;}
+  .staffrow{
+    display:flex;align-items:center;gap:12px;background:var(--surface);
+    border:1px solid var(--border);border-radius:12px;padding:13px 16px;
+    font-weight:600;font-size:1rem;text-align:left;width:100%;
+  }
+  .staffrow:hover{border-color:var(--gold);}
+  .avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--gold-soft);color:var(--gold-dark);
+    display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0;
+  }
+  .typetag{
+    width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.78rem;flex-shrink:0;
+  }
+  .typetag.guest{background:var(--gold-soft);color:var(--gold-dark);}
+  .typetag.employee{background:var(--navy-soft);color:var(--navy);}
+  .ghostbtn{
+    background:none;border:1px dashed var(--border);color:var(--ink-soft);border-radius:12px;
+    padding:12px;font-weight:600;font-size:0.92rem;width:100%;max-width:380px;
+  }
+  .ghostbtn:hover{border-color:var(--gold);color:var(--gold-dark);}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:0.82rem;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;
+    font-size:0.98rem;background:var(--surface);color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .pinrow{display:flex;gap:8px;}
+  .pinrow input{letter-spacing:4px;font-size:1.2rem;text-align:center;}
+
+  .btn{
+    border:none;border-radius:10px;padding:12px 18px;font-weight:700;font-size:0.95rem;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .btn-primary{background:var(--gold);color:#fff;}
+  .btn-primary:hover{background:var(--gold-dark);}
+  .btn-block{width:100%;}
+  .btn-secondary{background:var(--bg);color:var(--ink);border:1px solid var(--border);}
+  .btn-secondary:hover{background:#F0ECE3;}
+  .btn-danger{background:var(--red-soft);color:var(--red);}
+  .btn-danger:hover{background:#f0d9d3;}
+  .btn-green{background:var(--green);color:#fff;}
+  .btn-green:hover{background:#356a4c;}
+  .btn-sm{padding:8px 12px;font-size:0.82rem;}
+  .err{color:var(--red);font-size:0.85rem;margin-top:6px;font-weight:600;}
+  .formrow{display:flex;gap:10px;}
+  .formrow .field{flex:1;}
+
+  /* Segmented control */
+  .segmented{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .segmented button{
+    flex:1;padding:10px;background:var(--surface);border:none;font-weight:600;font-size:0.9rem;color:var(--ink-soft);
+    border-right:1px solid var(--border);
+  }
+  .segmented button:last-child{border-right:none;}
+  .segmented button.active{background:var(--gold);color:#fff;}
+
+  /* Dashboard */
+  .statrow{display:flex;gap:10px;margin-bottom:16px;}
+  .stat{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
+  .stat .num{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:600;line-height:1;}
+  .stat .lbl{font-size:0.74rem;color:var(--ink-soft);font-weight:600;margin-top:2px;}
+  .stat.amber .num{color:var(--gold-dark);}
+  .stat.green .num{color:var(--green);}
+
+  .toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+  .filterrow{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{
+    border:1px solid var(--border);background:var(--surface);border-radius:999px;
+    padding:6px 12px;font-size:0.8rem;font-weight:600;color:var(--ink-soft);
+  }
+  .chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .pkglist{display:flex;flex-direction:column;gap:10px;}
+  .pkgcard{
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left;width:100%;position:relative;
+  }
+  .pkgcard:hover{border-color:var(--gold);}
+  .pkgcard .info{flex:1;min-width:0;}
+  .pkgcard .name{font-weight:700;font-size:0.98rem;}
+  .pkgcard .sub{font-size:0.8rem;color:var(--ink-soft);margin-top:2px;}
+  .pill{
+    font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap;flex-shrink:0;
+  }
+  .pill.awaiting{background:var(--gold-soft);color:var(--gold-dark);}
+  .pill.picked{background:var(--green-soft);color:var(--green);}
+
+  .fab{
+    position:fixed;bottom:22px;right:50%;transform:translateX(310px);
+    background:var(--gold);color:#fff;border:none;border-radius:999px;
+    padding:14px 20px;font-weight:700;box-shadow:0 4px 14px rgba(140,95,44,0.35);
+    display:flex;align-items:center;gap:6px;z-index:30;
+  }
+  @media (max-width:640px){
+    .fab{right:18px;transform:none;}
+  }
+  .empty{text-align:center;color:var(--ink-soft);padding:50px 20px;font-size:0.92rem;}
+
+  /* Detail */
+  .detailhead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .detailrow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.92rem;}
+  .detailrow:last-child{border-bottom:none;}
+  .detailrow .k{color:var(--ink-soft);font-weight:600;}
+  .detailrow .v{font-weight:600;text-align:right;}
+
+  .sigbox{margin-top:16px;}
+  canvas#sigCanvasDetail{
+    width:100%;height:170px;border:1.5px dashed var(--border);border-radius:10px;background:#fff;
+    touch-action:none;
+  }
+  .sigactions{display:flex;gap:10px;margin-top:10px;}
+  .sigimg{max-width:220px;border:1px solid var(--border);border-radius:8px;background:#fff;margin-top:6px;}
+
+  /* Scanner modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(20,16,12,0.78);z-index:100;
+    display:flex;align-items:center;justify-content:center;padding:18px;
+  }
+  .modal-card{
+    background:var(--surface);border-radius:16px;max-width:420px;width:100%;
+    padding:18px;max-height:88vh;overflow:auto;
+  }
+  #scanner-reader{width:100%;border-radius:10px;overflow:hidden;background:#111;min-height:220px;}
+  .scanstatus{font-size:0.85rem;color:var(--ink-soft);margin-top:10px;min-height:20px;}
+
+  .toast{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:10px 18px;border-radius:999px;font-size:0.86rem;font-weight:600;z-index:200;
+    box-shadow:0 4px 14px rgba(0,0,0,0.25);
+  }
+  .banner{
+    background:var(--gold-soft);color:var(--gold-dark);border-radius:10px;padding:10px 14px;
+    font-size:0.82rem;font-weight:600;margin-bottom:14px;
+  }
+  .hint{font-size:0.78rem;color:var(--ink-soft);margin-top:5px;}
+  .staffmgmt-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+  .staffmgmt-row:last-child{border-bottom:none;}
+  .backlink{display:inline-block;margin-bottom:14px;color:var(--ink-soft);font-weight:600;font-size:0.85rem;text-decoration:none;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============== Storage helpers ==============
+   Backed by a Netlify Function (netlify/functions/data.js) which reads/writes
+   Netlify Blobs. No accounts of any kind are required to use this app —
+   the storage endpoint is just part of this site. */
+const DATA_ENDPOINT = '/.netlify/functions/data';
+let backendReachable = true;
+
+async function storageGetJSON(key, fallback){
+  try{
+    const res = await fetch(DATA_ENDPOINT + '?key=' + encodeURIComponent(key));
+    backendReachable = true;
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    if (data.value === undefined || data.value === null) return fallback;
+    return JSON.parse(data.value);
+  }catch(e){ backendReachable = false; return fallback; }
+}
+async function storageSetJSON(key, value){
+  try{
+    const res = await fetch(DATA_ENDPOINT + '?key=' + encodeURIComponent(key), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value: JSON.stringify(value) })
+    });
+    backendReachable = true;
+    return res.ok;
+  }catch(e){ backendReachable = false; console.error('storage set failed', e); return false; }
+}
+
+/* ============== State ============== */
+const state = {
+  view: 'login',
+  loading: true,
+  storageAvailable: true,
+  currentStaff: null,
+  staff: [],
+  packages: [],
+  departments: [],
+  filterStatus: 'all',
+  filterType: 'all',
+  search: '',
+  detailId: null,
+  signing: false,
+  toast: null,
+  loginSelectedId: null,
+  loginError: '',
+  addError: '',
+  staffAddError: '',
+  deptAddError: ''
+};
+
+let signatureHasStrokes = false;
+let scannerInstance = null;
+
+/* ============== Utilities ============== */
+function escapeHtml(str){
+  return String(str === undefined || str === null ? '' : str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function initials(name){
+  return (name||'').trim().split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase() || '?';
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function fmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  if (sameDay) return 'Today, ' + time;
+  return d.toLocaleDateString([], {month:'short', day:'numeric'}) + ', ' + time;
+}
+function guessCarrier(codeRaw){
+  const code = (codeRaw||'').trim().toUpperCase();
+  if (!code) return '';
+  if (/^1Z[0-9A-Z]{16}$/.test(code)) return 'UPS';
+  if (/^TBA/.test(code)) return 'Amazon';
+  if (/^(94|93|92|82|420)\d{16,26}$/.test(code) || /^[A-Z]{2}\d{9}US$/.test(code)) return 'USPS';
+  if (/^\d{12}$/.test(code) || /^\d{15}$/.test(code) || /^\d{20}$/.test(code)) return 'FedEx';
+  if (/^JD\d{16,18}$/.test(code) || /^\d{10,11}$/.test(code)) return 'DHL';
+  return '';
+}
+function showToast(msg){
+  state.toast = msg;
+  render();
+  setTimeout(()=>{ state.toast = null; render(); }, 2200);
+}
+
+/* ============== Init ============== */
+async function init(){
+  state.staff = await storageGetJSON('staff-roster', []);
+  state.packages = await storageGetJSON('package-index', []);
+  state.departments = await storageGetJSON('department-list', []);
+  state.storageAvailable = backendReachable;
+  state.loading = false;
+  render();
+}
+
+/* ============== Render ============== */
+const root = document.getElementById('app');
+
+function render(){
+  let html = '';
+  if (state.toast) html += `<div class="toast">${escapeHtml(state.toast)}</div>`;
+
+  if (state.loading){
+    html += `<div class="view"><p style="text-align:center;color:var(--ink-soft);padding:60px 0;">Loading…</p></div>`;
+    root.innerHTML = html;
+    return;
+  }
+
+  if (state.view !== 'login') html += renderTopBar();
+
+  if (state.view === 'login') html += renderLogin();
+  else if (state.view === 'dashboard') html += renderDashboard();
+  else if (state.view === 'add') html += renderAddForm();
+  else if (state.view === 'detail') html += renderDetail();
+  else if (state.view === 'admin') html += renderAdmin();
+
+  root.innerHTML = html;
+  attachSignaturePadIfNeeded();
+}
+
+function renderTopBar(){
+  const s = state.currentStaff;
+  return `
+  <div class="topbar">
+    <div class="brand"><span class="swatch"></span><span class="wordmark">SPM</span></div>
+    <nav>
+      ${s ? `<span class="staffchip">${escapeHtml(s.name)}</span>` : ''}
+      <button class="iconbtn" data-action="goto-dashboard">Packages</button>
+      ${s && s.isAdmin ? `<button class="iconbtn" data-action="goto-admin">Admin</button>` : ''}
+      <button class="iconbtn" data-action="logout">Log out</button>
+    </nav>
+  </div>`;
+}
+
+function renderLogin(){
+  if (!state.storageAvailable){
+    var bannerHtml = `<div class="banner">Heads up: this app can't reach its storage right now. If you just deployed this site, make sure the Netlify Function deployed correctly — otherwise, check your connection and reload.</div>`;
+  } else { var bannerHtml = ''; }
+
+  const lockup = `
+    <div class="lockup">
+      <div class="brandline"><span class="swatch"></span><span class="markline">SPM</span></div>
+      <div class="rule"></div>
+      <p class="tagline">Sheraton Keystone &middot; Package Management</p>
+    </div>`;
+
+  if (state.staff.length === 0){
+    return `
+    <div class="login-wrap">
+      ${lockup}
+      <div class="card pad" style="width:100%;max-width:380px;">
+        ${bannerHtml}
+        <h3 style="margin-bottom:12px;font-size:1.05rem;">Set up the first admin</h3>
+        <form data-form="add-staff-login">
+          <div class="field"><label>Your name</label><input name="name" required autocomplete="off"></div>
+          <div class="field"><label>Choose a 4–6 digit PIN</label><input name="pin" inputmode="numeric" pattern="[0-9]{4,6}" required placeholder="••••"></div>
+          ${state.staffAddError ? `<div class="err">${escapeHtml(state.staffAddError)}</div>` : ''}
+          <button class="btn btn-primary btn-block" type="submit" style="margin-top:6px;">Save and continue</button>
+        </form>
+        <p class="hint">This first person becomes the admin and can add other staff and departments from the Admin tab afterward.</p>
+      </div>
+    </div>`;
+  }
+
+  if (state.loginSelectedId){
+    const staffMember = state.staff.find(x=>x.id===state.loginSelectedId);
+    return `
+    <div class="login-wrap">
+      ${lockup}
+      <h1 class="greeting">Hi, ${escapeHtml(staffMember ? staffMember.name : '')}</h1>
+      <p class="subtext-light">Enter your PIN</p>
+      <div class="card pad" style="width:100%;max-width:380px;">
+        <form data-form="pin-confirm">
+          <div class="field"><input name="pin" class="pinrow" inputmode="numeric" pattern="[0-9]{4,6}" autofocus placeholder="••••" style="text-align:center;letter-spacing:6px;font-size:1.3rem;"></div>
+          ${state.loginError ? `<div class="err">${escapeHtml(state.loginError)}</div>` : ''}
+          <button class="btn btn-primary btn-block" type="submit">Continue</button>
+          <button class="btn btn-secondary btn-block" type="button" data-action="cancel-select-staff" style="margin-top:8px;">Back</button>
+        </form>
+      </div>
+    </div>`;
+  }
+
+  return `
+  <div class="login-wrap">
+    ${lockup}
+    <p class="subtext-light">Who's logging in?</p>
+    ${bannerHtml}
+    <div class="stafflist">
+      ${state.staff.map(s => `
+        <button class="staffrow" data-action="select-staff" data-id="${s.id}">
+          <span class="avatar">${initials(s.name)}</span>
+          <span>${escapeHtml(s.name)}</span>
+        </button>`).join('')}
+    </div>
+    <p class="hint-light">Don't see your name? Ask your admin to add you from the Admin tab.</p>
+  </div>`;
+}
+
+function filteredPackages(){
+  let list = state.packages.slice();
+  if (state.filterStatus !== 'all') list = list.filter(p => p.status === state.filterStatus);
+  if (state.filterType !== 'all') list = list.filter(p => p.recipientType === state.filterType);
+  if (state.search.trim()){
+    const q = state.search.trim().toLowerCase();
+    list = list.filter(p =>
+      (p.recipientName||'').toLowerCase().includes(q) ||
+      (p.roomOrDept||'').toLowerCase().includes(q) ||
+      (p.trackingNumber||'').toLowerCase().includes(q) ||
+      (p.carrier||'').toLowerCase().includes(q) ||
+      (p.senderName||'').toLowerCase().includes(q)
+    );
+  }
+  list.sort((a,b)=> new Date(b.receivedAt) - new Date(a.receivedAt));
+  return list;
+}
+
+function renderDashboard(){
+  const all = state.packages;
+  const awaitingGuest = all.filter(p=>p.status==='awaiting' && p.recipientType==='guest').length;
+  const awaitingEmp = all.filter(p=>p.status==='awaiting' && p.recipientType==='employee').length;
+  const pickedToday = all.filter(p=>p.status==='picked_up' && p.pickedUpAt && new Date(p.pickedUpAt).toDateString() === new Date().toDateString()).length;
+
+  const list = filteredPackages();
+
+  return `
+  <div class="view">
+    <div class="statrow">
+      <div class="stat amber"><div class="num">${awaitingGuest}</div><div class="lbl">Awaiting · Guests</div></div>
+      <div class="stat amber"><div class="num">${awaitingEmp}</div><div class="lbl">Awaiting · Staff</div></div>
+      <div class="stat green"><div class="num">${pickedToday}</div><div class="lbl">Picked up today</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="field" style="margin-bottom:0;">
+        <input type="text" placeholder="Search by name, room, or tracking #" id="searchInput" data-bind="search" value="${escapeHtml(state.search)}">
+      </div>
+      <div class="filterrow">
+        <button class="chip ${state.filterStatus==='all'?'active':''}" data-action="set-status" data-value="all">All</button>
+        <button class="chip ${state.filterStatus==='awaiting'?'active':''}" data-action="set-status" data-value="awaiting">Awaiting pickup</button>
+        <button class="chip ${state.filterStatus==='picked_up'?'active':''}" data-action="set-status" data-value="picked_up">Picked up</button>
+      </div>
+      <div class="filterrow">
+        <button class="chip ${state.filterType==='all'?'active':''}" data-action="set-type" data-value="all">Everyone</button>
+        <button class="chip ${state.filterType==='guest'?'active':''}" data-action="set-type" data-value="guest">Guests</button>
+        <button class="chip ${state.filterType==='employee'?'active':''}" data-action="set-type" data-value="employee">Staff</button>
+        <button class="chip" data-action="refresh">Refresh</button>
+      </div>
+    </div>
+
+    <div class="pkglist">
+      ${list.length === 0 ? `<div class="empty">No packages match. Tap "+ New package" to log one.</div>` : list.map(p => `
+        <button class="pkgcard" data-action="open-detail" data-id="${p.id}">
+          <span class="typetag ${p.recipientType === 'guest' ? 'guest' : 'employee'}">${p.recipientType === 'guest' ? 'G' : 'E'}</span>
+          <span class="info">
+            <span class="name">${escapeHtml(p.recipientName)}</span>
+            <span class="sub">${escapeHtml(p.roomOrDept || '—')} · ${escapeHtml(p.carrier || 'Carrier unknown')} · ${fmtDate(p.receivedAt)}</span>
+          </span>
+          <span class="pill ${p.status==='awaiting' ? 'awaiting' : 'picked'}">${p.status==='awaiting' ? 'Awaiting' : 'Picked up'}</span>
+        </button>
+      `).join('')}
+    </div>
+  </div>
+  <button class="fab" data-action="goto-add">+ New package</button>
+  `;
+}
+
+function renderAddForm(){
+  const type = state._addType || 'guest';
+  const d = state._addDraft || {};
+  const carrierOpts = ['UPS','FedEx','USPS','Amazon','DHL','OnTrac','Other / hand-delivered'];
+  return `
+  <div class="view view-narrow">
+    <a class="backlink" data-action="goto-dashboard" href="javascript:void(0)">← Back to packages</a>
+    <h2 style="margin-bottom:16px;">Log a new package</h2>
+    <form class="card pad" data-form="add-package">
+      <div class="field">
+        <label>Who is it for?</label>
+        <div class="segmented">
+          <button type="button" class="${type==='guest'?'active':''}" data-action="set-add-type" data-value="guest">Guest</button>
+          <button type="button" class="${type==='employee'?'active':''}" data-action="set-add-type" data-value="employee">Employee</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Recipient name</label>
+        <input name="recipientName" required autocomplete="off" placeholder="${type==='guest' ? 'e.g. Maria Chen' : 'e.g. Jordan Lee'}" value="${escapeHtml(d.recipientName||'')}">
+      </div>
+      <div class="field">
+        <label>${type==='guest' ? 'Room number' : 'Department'}</label>
+        ${type==='guest'
+          ? `<input name="roomOrDept" required autocomplete="off" placeholder="e.g. 412" value="${escapeHtml(d.roomOrDept||'')}">`
+          : (state.departments.length > 0
+              ? `<select name="roomOrDept" required>
+                  <option value="">Select department</option>
+                  ${state.departments.map(dep => `<option ${d.roomOrDept===dep ? 'selected' : ''}>${escapeHtml(dep)}</option>`).join('')}
+                </select>`
+              : `<input name="roomOrDept" required autocomplete="off" placeholder="e.g. Housekeeping" value="${escapeHtml(d.roomOrDept||'')}">
+                <p class="hint">Tip: your admin can add a department list in the Admin tab to make this a dropdown.</p>`)
+        }
+      </div>
+      <div class="formrow">
+        <div class="field">
+          <label>Carrier</label>
+          <select name="carrier" id="carrierSelect">
+            <option value="">Select carrier</option>
+            ${carrierOpts.map(c => `<option ${d.carrier===c ? 'selected' : ''}>${c}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Sender name (optional)</label>
+        <input name="senderName" autocomplete="off" placeholder="e.g. Nordstrom, Maria's mom" value="${escapeHtml(d.senderName||'')}">
+      </div>
+      <div class="field">
+        <label>Tracking / barcode number</label>
+        <div style="display:flex;gap:8px;">
+          <input name="trackingNumber" id="trackingInput" autocomplete="off" placeholder="Scan or type the number" style="flex:1;" value="${escapeHtml(d.trackingNumber||'')}">
+          <button type="button" class="btn btn-secondary" data-action="open-scanner">Scan barcode</button>
+        </div>
+        <p class="hint">Carrier auto-fills from common tracking formats — double-check it before saving.</p>
+      </div>
+      <div class="field">
+        <label>Notes (optional)</label>
+        <textarea name="notes" rows="2" placeholder="Size, condition, special handling…">${escapeHtml(d.notes||'')}</textarea>
+      </div>
+      ${state.addError ? `<div class="err">${escapeHtml(state.addError)}</div>` : ''}
+      <button class="btn btn-primary btn-block" type="submit">Save package</button>
+    </form>
+  </div>`;
+}
+
+function renderDetail(){
+  const p = state.packages.find(x=>x.id===state.detailId);
+  if (!p) return `<div class="view"><p>Package not found.</p></div>`;
+
+  let signingBlock = '';
+  if (state.signing){
+    signingBlock = `
+      <div class="sigbox">
+        <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--ink-soft);margin-bottom:6px;">Guest signature</label>
+        <canvas id="sigCanvasDetail"></canvas>
+        <div class="sigactions">
+          <button class="btn btn-secondary" data-action="clear-signature">Clear</button>
+          <button class="btn btn-green" data-action="confirm-pickup-guest" data-id="${p.id}">Confirm pickup</button>
+        </div>
+        <p class="hint">Have the guest sign above, then confirm.</p>
+      </div>`;
+  }
+
+  let pickupAction = '';
+  if (p.status === 'awaiting'){
+    if (p.recipientType === 'guest'){
+      pickupAction = state.signing ? '' : `<button class="btn btn-primary btn-block" data-action="start-pickup-guest" data-id="${p.id}" style="margin-top:16px;">Mark picked up — collect signature</button>`;
+    } else {
+      pickupAction = `<button class="btn btn-primary btn-block" data-action="confirm-pickup-employee" data-id="${p.id}" style="margin-top:16px;">Mark picked up</button>`;
+    }
+  }
+
+  let pickedInfo = '';
+  if (p.status === 'picked_up'){
+    pickedInfo = `<div class="detailrow"><span class="k">Picked up</span><span class="v">${fmtDate(p.pickedUpAt)} · ${escapeHtml(p.pickedUpBy||'')}</span></div>`;
+    if (p.signed){
+      pickedInfo += `<div id="sigViewSlot" data-sig-id="${p.id}"><p class="hint">Loading signature…</p></div>`;
+    }
+  }
+
+  return `
+  <div class="view view-narrow">
+    <a class="backlink" data-action="goto-dashboard" href="javascript:void(0)">← Back to packages</a>
+    <div class="card pad">
+      <div class="detailhead">
+        <h2>${escapeHtml(p.recipientName)}</h2>
+        <span class="pill ${p.status==='awaiting'?'awaiting':'picked'}">${p.status==='awaiting'?'Awaiting':'Picked up'}</span>
+      </div>
+      <div class="detailrow"><span class="k">Recipient type</span><span class="v">${p.recipientType==='guest' ? 'Guest' : 'Employee'}</span></div>
+      <div class="detailrow"><span class="k">${p.recipientType==='guest' ? 'Room' : 'Department'}</span><span class="v">${escapeHtml(p.roomOrDept||'—')}</span></div>
+      <div class="detailrow"><span class="k">Carrier</span><span class="v">${escapeHtml(p.carrier||'—')}</span></div>
+      ${p.senderName ? `<div class="detailrow"><span class="k">Sender</span><span class="v">${escapeHtml(p.senderName)}</span></div>` : ''}
+      <div class="detailrow"><span class="k">Tracking #</span><span class="v">${escapeHtml(p.trackingNumber||'—')}</span></div>
+      <div class="detailrow"><span class="k">Received</span><span class="v">${fmtDate(p.receivedAt)} · ${escapeHtml(p.receivedBy||'')}</span></div>
+      ${p.notes ? `<div class="detailrow"><span class="k">Notes</span><span class="v">${escapeHtml(p.notes)}</span></div>` : ''}
+      ${pickedInfo}
+      ${pickupAction}
+      ${signingBlock}
+    </div>
+  </div>`;
+}
+
+function renderAdmin(){
+  return `
+  <div class="view view-narrow">
+    <a class="backlink" data-action="goto-dashboard" href="javascript:void(0)">← Back to packages</a>
+    <h2 style="margin-bottom:16px;">Admin</h2>
+
+    <h3 style="margin-bottom:10px;font-size:1rem;">Staff</h3>
+    <div class="card pad">
+      ${state.staff.length===0 ? `<p class="hint">No staff added yet.</p>` : state.staff.map(s => `
+        <div class="staffmgmt-row">
+          <span><span class="avatar" style="display:inline-flex;width:28px;height:28px;font-size:0.7rem;margin-right:8px;vertical-align:middle;">${initials(s.name)}</span>${escapeHtml(s.name)}${s.isAdmin ? ' <span class="pill awaiting" style="margin-left:4px;">Admin</span>' : ''}</span>
+          ${s.isAdmin ? '' : `<button class="btn btn-danger btn-sm" data-action="delete-staff" data-id="${s.id}">Remove</button>`}
+        </div>
+      `).join('')}
+    </div>
+    <form class="card pad" data-form="add-staff-mgmt" style="margin-top:10px;">
+      <div class="field"><label>Name</label><input name="name" required autocomplete="off"></div>
+      <div class="field"><label>4–6 digit PIN</label><input name="pin" inputmode="numeric" pattern="[0-9]{4,6}" required></div>
+      ${state.staffAddError ? `<div class="err">${escapeHtml(state.staffAddError)}</div>` : ''}
+      <button class="btn btn-primary btn-block" type="submit">Add staff member</button>
+    </form>
+
+    <h3 style="margin:22px 0 10px;font-size:1rem;">Departments</h3>
+    <p class="hint" style="margin-top:-4px;margin-bottom:10px;">These show up as a dropdown when logging a package for an employee.</p>
+    <div class="card pad">
+      ${state.departments.length===0 ? `<p class="hint">No departments added yet.</p>` : state.departments.map(dep => `
+        <div class="staffmgmt-row">
+          <span>${escapeHtml(dep)}</span>
+          <button class="btn btn-danger btn-sm" data-action="delete-department" data-id="${escapeHtml(dep)}">Remove</button>
+        </div>
+      `).join('')}
+    </div>
+    <form class="card pad" data-form="add-department" style="margin-top:10px;">
+      <div class="field"><label>Department name</label><input name="deptName" required autocomplete="off" placeholder="e.g. Housekeeping"></div>
+      ${state.deptAddError ? `<div class="err">${escapeHtml(state.deptAddError)}</div>` : ''}
+      <button class="btn btn-primary btn-block" type="submit">Add department</button>
+    </form>
+  </div>`;
+}
+
+/* ============== Signature pad ============== */
+function attachSignaturePadIfNeeded(){
+  const canvas = document.getElementById('sigCanvasDetail');
+  if (canvas && !canvas.dataset.bound){
+    setupSignaturePad(canvas);
+    canvas.dataset.bound = 'true';
+  }
+  const sigSlot = document.getElementById('sigViewSlot');
+  if (sigSlot && !sigSlot.dataset.loaded){
+    sigSlot.dataset.loaded = 'true';
+    const id = sigSlot.getAttribute('data-sig-id');
+    storageGetJSON('package-sig:' + id, null).then(sig => {
+      if (sig && sig.dataUrl){
+        sigSlot.innerHTML = `<p class="hint" style="margin-top:10px;">Signature on file</p><img class="sigimg" src="${sig.dataUrl}">`;
+      } else {
+        sigSlot.innerHTML = `<p class="hint">Signature not found.</p>`;
+      }
+    });
+  }
+}
+
+function setupSignaturePad(canvas){
+  const ctx = canvas.getContext('2d');
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * ratio;
+  canvas.height = rect.height * ratio;
+  ctx.scale(ratio, ratio);
+  ctx.strokeStyle = '#2B2622';
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  signatureHasStrokes = false;
+  let drawing = false, lastX = 0, lastY = 0;
+
+  function pos(e){
+    const r = canvas.getBoundingClientRect();
+    return [e.clientX - r.left, e.clientY - r.top];
+  }
+  canvas.addEventListener('pointerdown', e => {
+    drawing = true;
+    [lastX, lastY] = pos(e);
+    try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const [x, y] = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    [lastX, lastY] = [x, y];
+    signatureHasStrokes = true;
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(ev => {
+    canvas.addEventListener(ev, () => { drawing = false; });
+  });
+}
+
+function clearSignaturePad(){
+  const canvas = document.getElementById('sigCanvasDetail');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const ratio = window.devicePixelRatio || 1;
+  ctx.clearRect(0, 0, canvas.width / ratio, canvas.height / ratio);
+  signatureHasStrokes = false;
+}
+
+/* ============== Scanner ============== */
+function loadScript(src){
+  return new Promise((resolve, reject) => {
+    if (document.querySelector('script[data-loaded="' + src + '"]')) return resolve();
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => { s.dataset.loaded = src; resolve(); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function openScanner(){
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'scannerOverlay';
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <h3 style="margin-bottom:10px;">Scan barcode</h3>
+      <div id="scanner-reader"></div>
+      <div class="scanstatus" id="scannerStatus">Starting camera…</div>
+      <button class="btn btn-secondary btn-block" id="scannerCancelBtn" style="margin-top:12px;">Cancel</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('scannerCancelBtn').addEventListener('click', closeScannerModal);
+
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js')
+    .then(startScanning)
+    .catch(() => setScannerStatus('Could not load the scanner. Check your connection, then close this and type the number in manually.'));
+}
+
+function setScannerStatus(msg){
+  const el = document.getElementById('scannerStatus');
+  if (el) el.textContent = msg;
+}
+
+function startScanning(){
+  try{
+    scannerInstance = new Html5Qrcode('scanner-reader');
+    scannerInstance.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      onScanSuccess,
+      () => {}
+    ).then(() => setScannerStatus('Point the camera at the barcode.'))
+     .catch(err => setScannerStatus('Camera unavailable (' + err + '). Close this and type the number in manually.'));
+  }catch(e){
+    setScannerStatus('Scanner failed to start. Close this and type the number in manually.');
+  }
+}
+
+function onScanSuccess(decodedText){
+  setScannerStatus('Got it: ' + decodedText);
+  const trackingInput = document.getElementById('trackingInput');
+  if (trackingInput) trackingInput.value = decodedText;
+  const carrierSelect = document.getElementById('carrierSelect');
+  if (carrierSelect && !carrierSelect.value){
+    const guess = guessCarrier(decodedText);
+    if (guess) carrierSelect.value = guess;
+  }
+  closeScannerModal();
+}
+
+function closeScannerModal(){
+  const overlay = document.getElementById('scannerOverlay');
+  if (scannerInstance){
+    scannerInstance.stop().then(() => scannerInstance.clear()).catch(() => {});
+    scannerInstance = null;
+  }
+  if (overlay) overlay.remove();
+}
+
+/* ============== Actions ============== */
+async function handleAction(action, target){
+  const id = target.getAttribute('data-id');
+  const value = target.getAttribute('data-value');
+
+  if (action === 'select-staff'){ state.loginSelectedId = id; state.loginError=''; render(); }
+  else if (action === 'cancel-select-staff'){ state.loginSelectedId = null; state.loginError=''; render(); }
+  else if (action === 'logout'){ state.currentStaff = null; state.view = 'login'; state.loginSelectedId=null; render(); }
+  else if (action === 'goto-dashboard'){ state.view = 'dashboard'; state.detailId=null; state.signing=false; render(); }
+  else if (action === 'goto-admin'){
+    if (!state.currentStaff || !state.currentStaff.isAdmin){ showToast('Admin access only'); return; }
+    state.view = 'admin'; state.staffAddError=''; state.deptAddError=''; render();
+  }
+  else if (action === 'goto-add'){ state.view = 'add'; state._addType='guest'; state._addDraft={}; state.addError=''; render(); }
+  else if (action === 'set-add-type'){
+    const form = document.querySelector('form[data-form="add-package"]');
+    if (form){
+      state._addDraft = {
+        recipientName: form.recipientName.value,
+        roomOrDept: form.roomOrDept.value,
+        carrier: form.carrier.value,
+        senderName: form.senderName.value,
+        trackingNumber: form.trackingNumber.value,
+        notes: form.notes.value
+      };
+    }
+    state._addType = value;
+    render();
+  }
+  else if (action === 'set-status'){ state.filterStatus = value; render(); }
+  else if (action === 'set-type'){ state.filterType = value; render(); }
+  else if (action === 'refresh'){
+    state.packages = await storageGetJSON('package-index', []);
+    showToast('Refreshed');
+  }
+  else if (action === 'open-detail'){ state.detailId = id; state.view = 'detail'; state.signing=false; render(); }
+  else if (action === 'open-scanner'){ openScanner(); }
+  else if (action === 'start-pickup-guest'){ state.signing = true; render(); }
+  else if (action === 'clear-signature'){ clearSignaturePad(); }
+  else if (action === 'confirm-pickup-guest'){ await confirmPickupGuest(id); }
+  else if (action === 'confirm-pickup-employee'){ await confirmPickupEmployee(id); }
+  else if (action === 'delete-staff'){ await deleteStaff(id); }
+  else if (action === 'delete-department'){ await deleteDepartment(id); }
+}
+
+async function confirmPickupGuest(id){
+  if (!signatureHasStrokes){
+    alert('Please have the guest sign before confirming pickup.');
+    return;
+  }
+  const canvas = document.getElementById('sigCanvasDetail');
+  const dataUrl = canvas.toDataURL('image/png');
+  await storageSetJSON('package-sig:' + id, { dataUrl });
+  const pkg = state.packages.find(p => p.id === id);
+  pkg.status = 'picked_up';
+  pkg.pickedUpAt = new Date().toISOString();
+  pkg.pickedUpBy = state.currentStaff.name;
+  pkg.signed = true;
+  await storageSetJSON('package-index', state.packages);
+  state.signing = false;
+  showToast('Pickup confirmed');
+  state.view = 'detail';
+  render();
+}
+
+async function confirmPickupEmployee(id){
+  const pkg = state.packages.find(p => p.id === id);
+  pkg.status = 'picked_up';
+  pkg.pickedUpAt = new Date().toISOString();
+  pkg.pickedUpBy = state.currentStaff.name;
+  pkg.signed = false;
+  await storageSetJSON('package-index', state.packages);
+  showToast('Pickup confirmed');
+  render();
+}
+
+async function deleteStaff(id){
+  const target = state.staff.find(s => s.id === id);
+  if (target && target.isAdmin){ showToast("Can't remove the admin account"); return; }
+  if (!confirm('Remove this staff member from the login list?')) return;
+  state.staff = state.staff.filter(s => s.id !== id);
+  await storageSetJSON('staff-roster', state.staff);
+  render();
+}
+
+async function deleteDepartment(name){
+  if (!confirm('Remove this department?')) return;
+  state.departments = state.departments.filter(d => d !== name);
+  await storageSetJSON('department-list', state.departments);
+  render();
+}
+
+/* ============== Form submissions ============== */
+async function handleSubmit(formName, form){
+  if (formName === 'add-staff-login'){
+    const name = form.name.value.trim();
+    const pin = form.pin.value.trim();
+    if (!name || !/^[0-9]{4,6}$/.test(pin)){ state.staffAddError = 'Enter a name and a 4–6 digit PIN.'; render(); return; }
+    const isFirst = state.staff.length === 0;
+    const newStaff = { id: uid(), name, pin, isAdmin: isFirst };
+    state.staff.push(newStaff);
+    await storageSetJSON('staff-roster', state.staff);
+    state.currentStaff = newStaff;
+    state.staffAddError = '';
+    state.view = 'dashboard';
+    render();
+  }
+  else if (formName === 'pin-confirm'){
+    const pin = form.pin.value.trim();
+    const staffMember = state.staff.find(s => s.id === state.loginSelectedId);
+    if (staffMember && staffMember.pin === pin){
+      state.currentStaff = staffMember;
+      state.loginSelectedId = null;
+      state.loginError = '';
+      state.view = 'dashboard';
+      render();
+    } else {
+      state.loginError = 'Incorrect PIN. Try again.';
+      render();
+    }
+  }
+  else if (formName === 'add-staff-mgmt'){
+    const name = form.name.value.trim();
+    const pin = form.pin.value.trim();
+    if (!name || !/^[0-9]{4,6}$/.test(pin)){ state.staffAddError = 'Enter a name and a 4–6 digit PIN.'; render(); return; }
+    state.staff.push({ id: uid(), name, pin, isAdmin: false });
+    await storageSetJSON('staff-roster', state.staff);
+    state.staffAddError = '';
+    showToast('Staff member added');
+    render();
+  }
+  else if (formName === 'add-department'){
+    const deptName = form.deptName.value.trim();
+    if (!deptName){ state.deptAddError = 'Enter a department name.'; render(); return; }
+    if (state.departments.some(d => d.toLowerCase() === deptName.toLowerCase())){
+      state.deptAddError = 'That department already exists.'; render(); return;
+    }
+    state.departments.push(deptName);
+    await storageSetJSON('department-list', state.departments);
+    state.deptAddError = '';
+    showToast('Department added');
+    render();
+  }
+  else if (formName === 'add-package'){
+    const fd = new FormData(form);
+    const recipientName = (fd.get('recipientName')||'').trim();
+    const roomOrDept = (fd.get('roomOrDept')||'').trim();
+    if (!recipientName || !roomOrDept){
+      state.addError = 'Please fill in the name and room/department.';
+      render();
+      return;
+    }
+    const pkg = {
+      id: uid(),
+      recipientType: state._addType || 'guest',
+      recipientName,
+      roomOrDept,
+      carrier: fd.get('carrier') || '',
+      senderName: (fd.get('senderName')||'').trim(),
+      trackingNumber: (fd.get('trackingNumber')||'').trim(),
+      notes: (fd.get('notes')||'').trim(),
+      receivedAt: new Date().toISOString(),
+      receivedBy: state.currentStaff.name,
+      status: 'awaiting',
+      pickedUpAt: null,
+      pickedUpBy: null,
+      signed: false
+    };
+    state.packages.push(pkg);
+    await storageSetJSON('package-index', state.packages);
+    state.addError = '';
+    state.view = 'dashboard';
+    showToast('Package logged for ' + recipientName);
+    render();
+  }
+}
+
+/* ============== Event delegation ============== */
+root.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (el) handleAction(el.getAttribute('data-action'), el);
+});
+root.addEventListener('submit', e => {
+  const form = e.target.closest('form[data-form]');
+  if (form){
+    e.preventDefault();
+    handleSubmit(form.getAttribute('data-form'), form);
+  }
+});
+root.addEventListener('input', e => {
+  if (e.target.id === 'searchInput'){
+    state.search = e.target.value;
+    renderListOnly();
+  }
+});
+
+/* Re-render just the package list area on search, to avoid losing input focus */
+function renderListOnly(){
+  // Re-render the whole dashboard but restore focus + cursor on the search box.
+  const active = document.activeElement;
+  const selStart = active && active.id === 'searchInput' ? active.selectionStart : null;
+  render();
+  const newInput = document.getElementById('searchInput');
+  if (newInput && selStart !== null){
+    newInput.focus();
+    newInput.setSelectionRange(selStart, selStart);
+  }
+}
+
+/* Auto-refresh shared data periodically while on the dashboard, skipping if the user is typing */
+setInterval(async () => {
+  if (state.view !== 'dashboard') return;
+  if (document.activeElement && document.activeElement.id === 'searchInput') return;
+  state.packages = await storageGetJSON('package-index', state.packages);
+  render();
+}, 15000);
+
+init();
+</script>
+</body>
+</html>
